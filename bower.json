@@ -1,0 +1,13 @@
+{
+  "name": "angularjs-tckno",
+  "version":"1.0.0",
+  "description": "Angular Tc No",
+  "main": [
+    "custom.js",
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "bower_components"
+  ]
+}
