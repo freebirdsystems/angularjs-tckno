@@ -1,5 +1,5 @@
-angular.module('app', [])
-    .directive('tcknoDogrulama', function () {
+angular.module('angular-check-tckno', [])
+    .directive('checkTckno', function () {
         function getLastChar(val) {
             var _val = String(val);
             var _tpl = 0;
@@ -13,7 +13,7 @@ angular.module('app', [])
         }
 
         function tenthValue(_val) {
-        		var _returnValue;
+                var _returnValue;
             var _tckn = _val.substr(0, 9);
             var _map = Array.prototype.map;
             var _stringToArray = _map.call(_tckn, function (x) {
@@ -29,9 +29,9 @@ angular.module('app', [])
                     _evenNumberTotal = parseInt(_evenNumberTotal) + parseInt(currentValue);
                 }
                 if ((((_oddNumberTotal * 7) - _evenNumberTotal) % 10) < 0){
-                	_returnValue = (((_oddNumberTotal * 7) - _evenNumberTotal) % 10) + 10;
+                    _returnValue = (((_oddNumberTotal * 7) - _evenNumberTotal) % 10) + 10;
                 }else{
-                	_returnValue = ((_oddNumberTotal * 7) - _evenNumberTotal) % 10;
+                    _returnValue = ((_oddNumberTotal * 7) - _evenNumberTotal) % 10;
                 }
                 return _returnValue;
             }, 0);
@@ -41,6 +41,7 @@ angular.module('app', [])
         return {
             restrict: 'A',
             link: function (scope, elm, attrs) {
+                
                 scope.$watch(attrs.ngModel, function (newValue, oldValue) {
                     /*
                     # --- TC Kimlik No Doğrulama Algoritması --- #
@@ -54,49 +55,43 @@ angular.module('app', [])
                     İŞLEM: 1. 2. 3. 4. 5. 6. 7. 8. 9. ve 10. hanelerin toplamından elde edilen sonucun 
                     10′a bölümünden (Mod 10) kalan, bize 11. haneyi verir.
                     */
-                    var _ngModelNameFull = attrs.ngModel;
-                    var _ngModelName = _ngModelNameFull.split(".");
+                    var _modelNameFull = attrs.checkTckno.split(".");
+
+                    var _modelScope = scope[_modelNameFull[0]][_modelNameFull[1]] ? scope[_modelNameFull[0]][_modelNameFull[1]] : scope[_modelNameFull[0]][_modelNameFull[1]] =  {};
+  
                     var _error = false;
-                    if (elm.val().length === 0) {
-                        _error = true;
-                        scope[_ngModelName[0]].message = "Lütfen TC Kimlik No Girin.";
-                    }
+
                     // KURAL-2
                     if (elm.val().length > 0 && elm.val().length !== 11) {
                         _error = true;
-                        scope[_ngModelName[0]].message = "TC Kimlik No 11 Rakamdan Oluşmaktadır.";
+                        _modelScope.message = "TC Kimlik No 11 rakamdan oluşmalıdır.";
                     }
                     // KURAL-3
                     if (elm.val().substr(0, 1) === "0") {
                         _error = true;
-                        scope[_ngModelName[0]].message = "TC Kimlik Numarasının İlk Rakamı Sıfır Olamaz.";
+                        _modelScope.message = "TC Kimlik No geçersizdir.";
                     }
                     // KURAL-4
                     if (elm.val().length > 9) {
                         if (tenthValue(elm.val()) != elm.val().substr(9, 1)) {
                             _error = true;
-                            scope[_ngModelName[0]].message = "Geçerli Bir TC Kimlik No Giriniz.";
+                            _modelScope.message = "TC Kimlik No geçersizdir.";
                         }
                     }
                     // KURAL-5
                     if (elm.val().length === 11) {
                         if (getLastChar(elm.val()) !== String(elm.val()).substr(10, 1)) {
                             _error = true;
-                            scope[_ngModelName[0]].message = "Geçerli Bir TC Kimlik No Giriniz.";
+                            _modelScope.message = "TC Kimlik No geçersizdir.";
                         }
                     }
-                    if (_error === true) {
-                        scope[_ngModelName[0]].status = true;
-                    } else {
-                        scope[_ngModelName[0]].status = false;
+                    if (_error === false && elm.val().length === 11) {
+                        _modelScope.message = "TC Kimlik No kullanıma uygundur.";
                     }
+
+                    _modelScope.valid = !_error;
+
                 });
             }
         };
     })
-    .controller('TCKN', ['$scope', function ($scope) {
-        $scope.TCKimlikNo = {
-            status: true,
-            message: "Lütfen TC Kimlik No Giriniz."
-        };
-}]);
